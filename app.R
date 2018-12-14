@@ -4,7 +4,7 @@ library(shiny)
 ui <- fluidPage(
   
   # App title ----
-  titlePanel("Hello Shiny!"),
+  titlePanel("Monte-Carlo Portfolio-Simulation"),
   
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -17,8 +17,11 @@ ui <- fluidPage(
                   label = "Number of bins:",
                   min = 1,
                   max = 50,
-                  value = 30)
+                  value = 30),
       
+      numericInput("num", 
+                 h3("Gesamtwert"), 
+                 value = 1000)
     ),
     
     # Main panel for displaying outputs ----
@@ -49,7 +52,7 @@ server <- function(input, output) {
     
     hist(x, breaks = bins, col = "#75AADB", border = "white",
          xlab = "Waiting time to next eruption (in mins)",
-         main = "Histogram of waiting times")
+         main = input$num)
     
   })
   
