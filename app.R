@@ -1,10 +1,25 @@
 library(shiny)
+library(DT)
+
+dat <- data.frame(
+  V1 = c(as.character(numericInput("x11", "", 0)), as.character(numericInput("x21", "", 1)), as.character(numericInput("x31", "", 2))),
+  V2 = c(as.character(numericInput("x12", "", 3)), as.character(numericInput("x22", "", 4)), as.character(numericInput("x32", "", 5))),
+  V3 = c(as.character(numericInput("x13", "", 6)), as.character(numericInput("x23", "", 7)), as.character(numericInput("x33", "", 8))),
+  V4 = c(as.character(numericInput("x14", "", 9)), as.character(numericInput("x24", "", 10)), as.character(numericInput("x34", "", 11)))
+)
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
   
   # App title ----
   titlePanel("Monte-Carlo Portfolio-Simulation"),
+  
+  fluidRow(
+    column(5, DT::dataTableOutput('my_table')),
+    column(5),
+    column(5),
+    column(5)
+  ),
   
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -55,6 +70,19 @@ server <- function(input, output) {
          main = input$num)
     
   })
+  
+  output$my_table <- DT::renderDataTable(
+    dat, selection = "none", 
+    options = list(searching = FALSE, paging=FALSE, ordering=FALSE, dom="t"), 
+    server = FALSE, escape = FALSE, rownames= FALSE, colnames=c("", ""), 
+    callback = JS("table.rows().every(function(i, tab, row) {
+                  var $this = $(this.node());
+                  $this.attr('id', this.data()[0]);
+                  $this.addClass('shiny-input-container');
+                  });
+                  Shiny.unbindAll(table.table().node());
+                  Shiny.bindAll(table.table().node());")
+  )
   
 }
 
