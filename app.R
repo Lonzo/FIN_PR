@@ -1,25 +1,11 @@
 library(shiny)
 library(DT)
 
-dat <- data.frame(
-  V1 = c(as.character(numericInput("x11", "", 0)), as.character(numericInput("x21", "", 1)), as.character(numericInput("x31", "", 2))),
-  V2 = c(as.character(numericInput("x12", "", 3)), as.character(numericInput("x22", "", 4)), as.character(numericInput("x32", "", 5))),
-  V3 = c(as.character(numericInput("x13", "", 6)), as.character(numericInput("x23", "", 7)), as.character(numericInput("x33", "", 8))),
-  V4 = c(as.character(numericInput("x14", "", 9)), as.character(numericInput("x24", "", 10)), as.character(numericInput("x34", "", 11)))
-)
-
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
   
   # App title ----
   titlePanel("Monte-Carlo Portfolio-Simulation"),
-  
-  fluidRow(
-    column(5, DT::dataTableOutput('my_table')),
-    column(5),
-    column(5),
-    column(5)
-  ),
   
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -27,16 +13,59 @@ ui <- fluidPage(
     # Sidebar panel for inputs ----
     sidebarPanel(
       
-      # Input: Slider for the number of bins ----
-      sliderInput(inputId = "bins",
-                  label = "Number of bins:",
-                  min = 1,
-                  max = 50,
-                  value = 30),
-      
-      numericInput("num", 
-                 h3("Gesamtwert"), 
-                 value = 1000)
+		  # Input: Slider for the number of bins ----
+		fluidRow(
+			column(6,
+				textInput("stock1", "Stock 1", "SPY")),
+			column(5,
+				numericInput("w1", "Portf. %", 25, 
+				   min = 1, max = 100))
+		),
+		fluidRow(
+			column(6,
+				textInput("stock2", "Stock 2", "SPY")),
+			column(5,
+				numericInput("w1", "Portf. %", 25, 
+				   min = 1, max = 100))
+		),
+		fluidRow(
+			column(6,
+				textInput("stock3", "Stock 3", "SPY")),
+			column(5,
+				numericInput("w1", "Portf. %", 25, 
+				   min = 1, max = 100))
+		),
+		fluidRow(
+			column(6,
+				textInput("stock4", "Stock 4", "SPY")),
+			column(5,
+				numericInput("w1", "Portf. %", 25, 
+				   min = 1, max = 100))
+		),
+		fluidRow(
+			column(6,
+				textInput("stock5", "Stock 5", "SPY")),
+			column(5,
+				numericInput("w1", "Portf. %", 25, 
+				   min = 1, max = 100))
+		),
+		fluidRow(
+		column(7,
+			dateInput("date", 
+				"Starting Date", 
+				"2013-01-01", 
+				format = "yyyy-mm-dd")),
+			dateInput("date", 
+				"End Date", 
+				"2014-01-01", 
+				format = "yyyy-mm-dd"))
+				
+		),
+		fluidRow(
+			column(5,
+				numericInput("sims", "Number of Simulations", 51, 
+				min = 1000, max = 100000, step = 10))
+)
     ),
     
     # Main panel for displaying outputs ----
@@ -46,8 +75,8 @@ ui <- fluidPage(
       plotOutput(outputId = "distPlot")
       
     )
-  )
 )
+
 
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
