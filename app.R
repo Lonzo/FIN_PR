@@ -1,5 +1,4 @@
 library(shiny)
-library(DT)
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
@@ -13,60 +12,66 @@ ui <- fluidPage(
     # Sidebar panel for inputs ----
     sidebarPanel(
       
-		  # Input: Slider for the number of bins ----
 		fluidRow(
 			column(6,
-				textInput("stock1", "Stock 1", "SPY")),
+				textInput("stock1", "Stock 1", "")),
 			column(5,
-				numericInput("w1", "Portf. %", 25, 
+				numericInput("w1", "Portf. %", 20, 
 				   min = 1, max = 100))
 		),
 		fluidRow(
 			column(6,
-				textInput("stock2", "Stock 2", "SPY")),
+				textInput("stock2", "Stock 2", "")),
 			column(5,
-				numericInput("w1", "Portf. %", 25, 
+				numericInput("w1", "Portf. %", 20, 
 				   min = 1, max = 100))
 		),
 		fluidRow(
 			column(6,
-				textInput("stock3", "Stock 3", "SPY")),
+				textInput("stock3", "Stock 3", "")),
 			column(5,
-				numericInput("w1", "Portf. %", 25, 
+				numericInput("w1", "Portf. %", 20,
 				   min = 1, max = 100))
 		),
 		fluidRow(
 			column(6,
-				textInput("stock4", "Stock 4", "SPY")),
+				textInput("stock4", "Stock 4", "")),
 			column(5,
-				numericInput("w1", "Portf. %", 25, 
+				numericInput("w1", "Portf. %", 20,
 				   min = 1, max = 100))
 		),
 		fluidRow(
 			column(6,
-				textInput("stock5", "Stock 5", "SPY")),
+				textInput("stock5", "Stock 5", "")),
 			column(5,
-				numericInput("w1", "Portf. %", 25, 
+				numericInput("w1", "Portf. %", 20, 
 				   min = 1, max = 100))
 		),
 		fluidRow(
-		column(7,
+		column(6,
 			dateInput("date", 
 				"Starting Date", 
 				"2013-01-01", 
 				format = "yyyy-mm-dd")),
-			dateInput("date", 
+		column(6,
+			 dateInput("date", 
 				"End Date", 
 				"2014-01-01", 
 				format = "yyyy-mm-dd"))
 				
 		),
 		fluidRow(
-			column(5,
-				numericInput("sims", "Number of Simulations", 51, 
+			column(8,
+				numericInput("sims", "Number of Simulations", 1000, 
 				min = 1000, max = 100000, step = 10))
-)
     ),
+		fluidRow(
+		  column(5, actionButton("submit", "Go!"))
+		)
+		
+		
+		
+  ),
     
     # Main panel for displaying outputs ----
     mainPanel(
@@ -75,6 +80,7 @@ ui <- fluidPage(
       plotOutput(outputId = "distPlot")
       
     )
+  )
 )
 
 
@@ -89,29 +95,11 @@ server <- function(input, output) {
   # 1. It is "reactive" and therefore should be automatically
   #    re-executed when inputs (input$bins) change
   # 2. Its output type is a plot
-  output$distPlot <- renderPlot({
-    
-    x    <- faithful$waiting
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    hist(x, breaks = bins, col = "#75AADB", border = "white",
-         xlab = "Waiting time to next eruption (in mins)",
-         main = input$num)
-    
-  })
   
-  output$my_table <- DT::renderDataTable(
-    dat, selection = "none", 
-    options = list(searching = FALSE, paging=FALSE, ordering=FALSE, dom="t"), 
-    server = FALSE, escape = FALSE, rownames= FALSE, colnames=c("", ""), 
-    callback = JS("table.rows().every(function(i, tab, row) {
-                  var $this = $(this.node());
-                  $this.attr('id', this.data()[0]);
-                  $this.addClass('shiny-input-container');
-                  });
-                  Shiny.unbindAll(table.table().node());
-                  Shiny.bindAll(table.table().node());")
-  )
+  observeEvent(input$sumbit, {
+    session$sendCustomMessage(type = 'testmessage',
+                              message = 'Thank you for clicking')
+  })
   
 }
 
