@@ -89,12 +89,13 @@ server <- function(input, output) {
   
   # reactive expression
   stocks_reactive <- eventReactive( input$submit, {
-    stocks <- c(getStockPrices(input$stock1), getStockPrices(input$stock2), getStockPrices(input$stock3), getStockPrices(input$stock4), getStockPrices(input$stock5))
+    #stocks <- c(input$stock1, input$stock2, input$stock3, input$stock4, input$stock5)
+    stocks <- c(input$stock1)
   })
   
   # reactive expression
   weights_reactive <- eventReactive( input$submit, {
-    stocks <- c(input$w1, input$w2, input$w3, input$w4, input$w5)
+    weights <- c(input$w1, input$w2, input$w3, input$w4, input$w5)
   })
   
   # text output
@@ -102,13 +103,15 @@ server <- function(input, output) {
     stocks <- stocks_reactive()
     weights <- weights_reactive()
     
-    mean_stocks <- calcMean(stocks)
-    sd_stocks <- calcSd(stocks)
+    stock1prices <- getStockPrices(stocks[1])
+    stock1mean <- calcMean(stock1prices)
+    stock1sd <- calcSd(stock1prices, stock1mean)
     
-    print(stocks)
-    print(weights)
-    print(mean_stocks)
-    print(sd_stocks)
+    print("Stock 1 Mean:")
+    print(stock1mean)
+    print("Stock 1 SD:")
+    print(stock1sd)
+
   })
   
 }
@@ -118,15 +121,13 @@ server <- function(input, output) {
 # Load Historic Data from Yahoo
 # Args Stockname, fromDate, toDate
 getStockPrices <- function(stock){
-  print("getStockPrices running!")
-  print (stock)
   environment<-new.env()
   
   options("getSymbols.yahoo.warning"=FALSE)
   getSymbols(stock,
              env = environment,
              src = "yahoo",
-             from = as.Date("2009-01-01"),
+             from = as.Date("2018-01-01"),
              to = as.Date("2019-01-01"))
   
   output<-get(stock, envir = environment)
@@ -136,17 +137,33 @@ getStockPrices <- function(stock){
   return (closingPrices) 
 }
 
-calcMean <- function(stocks){
-  print("Mean: ")
-  for (j in stocks) {
-    print(j)
+calcMean <- function(stockprices){
+  counter = 0
+  sum = 0
+  for (j in stockprices) {
+    counter = counter + 1
+    sum = sum + j
+    
   }
+  print("Sum of Stock is / Number of Stock values is")
+  print(sum)
+  print(counter)
+  mean = sum / counter
 
+  return (mean)
 }
 
-calcSd <- function(stocks){
-  print("SD: ")
+calcSd <- function(stockprices, stockmean){
+  counter = 0
+  temp1 = 0
+  for (j in stockprices) {
+    counter = counter + 1
+    temp1 = temp1 + ((j-stockmean) * (j-stockmean))
+  }
   
+  sd = sqrt(temp1 / (counter-1))
+  
+  return (sd)
 }
 
 
