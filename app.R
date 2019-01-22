@@ -77,7 +77,7 @@ ui <- fluidPage(
         plotOutput(outputId = "distPlot")
       ),
       fluidRow(
-        column(8, textOutput("textop1"))
+        column(12, textOutput("textop1"))
       )
     )
   )
@@ -107,10 +107,9 @@ server <- function(input, output) {
     stock1mean <- calcMean(stock1prices)
     stock1sd <- calcSd(stock1prices, stock1mean)
     
-    print("Stock 1 Mean:")
-    print(stock1mean)
-    print("Stock 1 SD:")
-    print(stock1sd)
+    print(paste("Stock 1 Mean: ", stock1mean, " Stock 1 SD: " , stock1sd))
+    
+    
 
   })
   
