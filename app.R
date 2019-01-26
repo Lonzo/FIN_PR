@@ -132,7 +132,7 @@ server <- function(input, output) {
       stock4growths <- calculateGrowth(stock4prices)
       stock4growthsMean <- calcMean(stock4growths)
       stock4growthsSd <- calcSd(stock4growths, stock4growthsMean)
-      print(paste("Stock 1 Growth Mean: ", stock4growthsMean, " Stock 4 Growth SD: " , stock4growthsSd))
+      print(paste("Stock 4 Growth Mean: ", stock4growthsMean, " Stock 4 Growth SD: " , stock4growthsSd))
     }
     
     if (stocks[5] != "") {
