@@ -89,8 +89,8 @@ server <- function(input, output) {
   
   # reactive expression
   stocks_reactive <- eventReactive( input$submit, {
-    #stocks <- c(input$stock1, input$stock2, input$stock3, input$stock4, input$stock5)
-    stocks <- c(input$stock1)
+    stocks <- c(input$stock1, input$stock2, input$stock3, input$stock4, input$stock5)
+    #stocks <- c(input$stock1)
   })
   
   # reactive expression
@@ -103,37 +103,37 @@ server <- function(input, output) {
     stocks <- stocks_reactive()
     weights <- weights_reactive()
     
-    if (!is.null(stocks[1]) || stocks[1] == "") {
+    if (stocks[1] != "") {
       stock1prices <- getStockPrices(stocks[1])
-      #stock1growths <- calculateGrowth(stock1prices)
-      #print(stock1growths)
-      stock1mean <- calcMean(stock1prices)
-      stock1sd <- calcSd(stock1prices, stock1mean)
-      print(paste("Stock 1 Mean: ", stock1mean, " Stock 1 SD: " , stock1sd))
+      stock1growths <- calculateGrowth(stock1prices)
+      stock1growthsMean <- calcMean(stock1growths)
+      stock1growthsSd <- calcSd(stock1growths, stock1growthsMean)
+      print(paste("Stock 1 Growth Mean: ", stock1growthsMean, " Stock 1 Growth SD: " , stock1growthsSd))
     }
     
-    if (!is.null(stocks[2]) || stocks[2] == "") {
+    if (stocks[2] != "") {
+      browser()
       stock2prices <- getStockPrices(stocks[2])
       stock2mean <- calcMean(stock2prices)
       stock2sd <- calcSd(stock2prices, stock2mean)
       print(paste("Stock 2 Mean: ", stock2mean, " Stock 2 SD: " , stock2sd))
     }
     
-    if (is.null(stocks[3]) || stocks[3] == "") {
+    if (stocks[3] != "") {
       stock3prices <- getStockPrices(stocks[3])
       stock3mean <- calcMean(stock3prices)
       stock3sd <- calcSd(stock3prices, stock3mean)
       print(paste("Stock 3 Mean: ", stock3mean, " Stock 3 SD: " , stock3sd))
     }
     
-    if (is.null(stocks[4]) || stocks[4] == "") {
+    if (stocks[4] != "") {
       stock4prices <- getStockPrices(stocks[4])
       stock4mean <- calcMean(stock4prices)
       stock4sd <- calcSd(stock1prices, stock4mean)
       print(paste("Stock 4 Mean: ", stock4mean, " Stock 4 SD: " , stock4sd))
     }
     
-    if (is.null(stocks[5]) || stocks[5] == "") {
+    if (stocks[5] != "") {
       stock5prices <- getStockPrices(stocks[5])
       stock5mean <- calcMean(stock5prices)
       stock5sd <- calcSd(stock1prices, stock5mean)
@@ -167,15 +167,13 @@ getStockPrices <- function(stock){
 
 calcMean <- function(stockprices){
   counter = 0
-  sum = 0
+  sum = 0L
   for (j in stockprices) {
     counter = counter + 1
     sum = sum + j
     
   }
-  print("Sum of Stock is / Number of Stock values is")
-  print(sum)
-  print(counter)
+  
   mean = sum / counter
 
   return (mean)
@@ -197,7 +195,19 @@ calcSd <- function(stockprices, stockmean){
 
 # Calculate Growth
 calculateGrowth <- function(values){
-
+  growths <- integer(length(values))
+  lastVal <- NULL
+  i <- 0
+  
+  for (j in values) {
+    if (i>0){
+      growths[i] <- (j-lastVal)/lastVal
+    }
+    
+    lastVal <- j
+    i <- i + 1
+  }
+  return (growths)
 }
 
 
