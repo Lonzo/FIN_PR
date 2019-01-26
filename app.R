@@ -112,32 +112,35 @@ server <- function(input, output) {
     }
     
     if (stocks[2] != "") {
-      browser()
       stock2prices <- getStockPrices(stocks[2])
-      stock2mean <- calcMean(stock2prices)
-      stock2sd <- calcSd(stock2prices, stock2mean)
-      print(paste("Stock 2 Mean: ", stock2mean, " Stock 2 SD: " , stock2sd))
+      stock2growths <- calculateGrowth(stock2prices)
+      stock2growthsMean <- calcMean(stock2growths)
+      stock2growthsSd <- calcSd(stock2growths, stock2growthsMean)
+      print(paste("Stock 2 Growth Mean: ", stock2growthsMean, " Stock 2 Growth SD: " , stock2growthsSd))
     }
     
     if (stocks[3] != "") {
       stock3prices <- getStockPrices(stocks[3])
-      stock3mean <- calcMean(stock3prices)
-      stock3sd <- calcSd(stock3prices, stock3mean)
-      print(paste("Stock 3 Mean: ", stock3mean, " Stock 3 SD: " , stock3sd))
+      stock3growths <- calculateGrowth(stock3prices)
+      stock3growthsMean <- calcMean(stock3growths)
+      stock3growthsSd <- calcSd(stock3growths, stock3growthsMean)
+      print(paste("Stock 3 Growth Mean: ", stock3growthsMean, " Stock 3 Growth SD: " , stock3growthsSd))
     }
     
     if (stocks[4] != "") {
       stock4prices <- getStockPrices(stocks[4])
-      stock4mean <- calcMean(stock4prices)
-      stock4sd <- calcSd(stock1prices, stock4mean)
-      print(paste("Stock 4 Mean: ", stock4mean, " Stock 4 SD: " , stock4sd))
+      stock4growths <- calculateGrowth(stock4prices)
+      stock4growthsMean <- calcMean(stock4growths)
+      stock4growthsSd <- calcSd(stock4growths, stock4growthsMean)
+      print(paste("Stock 1 Growth Mean: ", stock4growthsMean, " Stock 4 Growth SD: " , stock4growthsSd))
     }
     
     if (stocks[5] != "") {
       stock5prices <- getStockPrices(stocks[5])
-      stock5mean <- calcMean(stock5prices)
-      stock5sd <- calcSd(stock1prices, stock5mean)
-      print(paste("Stock 5 Mean: ", stock5mean, " Stock 5 SD: " , stock5sd))
+      stock5growths <- calculateGrowth(stock5prices)
+      stock5growthsMean <- calcMean(stock5growths)
+      stock5growthsSd <- calcSd(stock5growths, stock5growthsMean)
+      print(paste("Stock 5 Growth Mean: ", stock5growthsMean, " Stock 5 Growth SD: " , stock5growthsSd))
     }
 
   })
