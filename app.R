@@ -103,13 +103,42 @@ server <- function(input, output) {
     stocks <- stocks_reactive()
     weights <- weights_reactive()
     
-    stock1prices <- getStockPrices(stocks[1])
-    stock1mean <- calcMean(stock1prices)
-    stock1sd <- calcSd(stock1prices, stock1mean)
+    if (!is.null(stocks[1]) || stocks[1] == "") {
+      stock1prices <- getStockPrices(stocks[1])
+      #stock1growths <- calculateGrowth(stock1prices)
+      #print(stock1growths)
+      stock1mean <- calcMean(stock1prices)
+      stock1sd <- calcSd(stock1prices, stock1mean)
+      print(paste("Stock 1 Mean: ", stock1mean, " Stock 1 SD: " , stock1sd))
+    }
     
-    print(paste("Stock 1 Mean: ", stock1mean, " Stock 1 SD: " , stock1sd))
+    if (!is.null(stocks[2]) || stocks[2] == "") {
+      stock2prices <- getStockPrices(stocks[2])
+      stock2mean <- calcMean(stock2prices)
+      stock2sd <- calcSd(stock2prices, stock2mean)
+      print(paste("Stock 2 Mean: ", stock2mean, " Stock 2 SD: " , stock2sd))
+    }
     
+    if (is.null(stocks[3]) || stocks[3] == "") {
+      stock3prices <- getStockPrices(stocks[3])
+      stock3mean <- calcMean(stock3prices)
+      stock3sd <- calcSd(stock3prices, stock3mean)
+      print(paste("Stock 3 Mean: ", stock3mean, " Stock 3 SD: " , stock3sd))
+    }
     
+    if (is.null(stocks[4]) || stocks[4] == "") {
+      stock4prices <- getStockPrices(stocks[4])
+      stock4mean <- calcMean(stock4prices)
+      stock4sd <- calcSd(stock1prices, stock4mean)
+      print(paste("Stock 4 Mean: ", stock4mean, " Stock 4 SD: " , stock4sd))
+    }
+    
+    if (is.null(stocks[5]) || stocks[5] == "") {
+      stock5prices <- getStockPrices(stocks[5])
+      stock5mean <- calcMean(stock5prices)
+      stock5sd <- calcSd(stock1prices, stock5mean)
+      print(paste("Stock 5 Mean: ", stock5mean, " Stock 5 SD: " , stock5sd))
+    }
 
   })
   
@@ -168,9 +197,9 @@ calcSd <- function(stockprices, stockmean){
 
 # Calculate Growth
 calculateGrowth <- function(values){
-  print(values)
+
 }
 
 
-# Create Shiny app ----
+# Create Shiny app 
 shinyApp(ui = ui, server = server)
