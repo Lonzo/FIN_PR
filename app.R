@@ -108,6 +108,8 @@ server <- function(input, output) {
       stock1growths <- calculateGrowth(stock1prices)
       stock1growthsMean <- calcMean(stock1growths)
       stock1growthsSd <- calcSd(stock1growths, stock1growthsMean)
+      simulatedStockPrices1 <- simulateGrowth(stock1growthsMean, stock1growthsSd, stock1prices[length(stock1prices)], 20, input$sims)
+      
       print(paste("Stock 1 Growth Mean: ", stock1growthsMean, " Stock 1 Growth SD: " , stock1growthsSd))
     }
     
@@ -116,6 +118,8 @@ server <- function(input, output) {
       stock2growths <- calculateGrowth(stock2prices)
       stock2growthsMean <- calcMean(stock2growths)
       stock2growthsSd <- calcSd(stock2growths, stock2growthsMean)
+      simulatedStockPrices2 <- simulateGrowth(stock2growthsMean, stock2growthsSd, stock2prices[length(stock2prices)], 20, input$sims)
+      
       print(paste("Stock 2 Growth Mean: ", stock2growthsMean, " Stock 2 Growth SD: " , stock2growthsSd))
     }
     
@@ -124,6 +128,8 @@ server <- function(input, output) {
       stock3growths <- calculateGrowth(stock3prices)
       stock3growthsMean <- calcMean(stock3growths)
       stock3growthsSd <- calcSd(stock3growths, stock3growthsMean)
+      simulatedStockPrices3 <- simulateGrowth(stock3growthsMean, stock3growthsSd, stock3prices[length(stock3prices)], 20, input$sims)
+      
       print(paste("Stock 3 Growth Mean: ", stock3growthsMean, " Stock 3 Growth SD: " , stock3growthsSd))
     }
     
@@ -132,6 +138,8 @@ server <- function(input, output) {
       stock4growths <- calculateGrowth(stock4prices)
       stock4growthsMean <- calcMean(stock4growths)
       stock4growthsSd <- calcSd(stock4growths, stock4growthsMean)
+      simulatedStockPrices4 <- simulateGrowth(stock4growthsMean, stock4growthsSd, stock4prices[length(stock4prices)], 20, input$sims)
+      
       print(paste("Stock 4 Growth Mean: ", stock4growthsMean, " Stock 4 Growth SD: " , stock4growthsSd))
     }
     
@@ -140,6 +148,8 @@ server <- function(input, output) {
       stock5growths <- calculateGrowth(stock5prices)
       stock5growthsMean <- calcMean(stock5growths)
       stock5growthsSd <- calcSd(stock5growths, stock5growthsMean)
+      simulatedStockPrices5 <- simulateGrowth(stock5growthsMean, stock5growthsSd, stock5prices[length(stock5prices)], 20, input$sims)
+      
       print(paste("Stock 5 Growth Mean: ", stock5growthsMean, " Stock 5 Growth SD: " , stock5growthsSd))
     }
 
@@ -211,6 +221,27 @@ calculateGrowth <- function(values){
     i <- i + 1
   }
   return (growths)
+}
+
+
+# Simulate growth
+simulateGrowth <- function(mean, sd, start, numofdays, sims) {
+  simulatedValues <- integer(length(numofdays))
+  
+  simulatedGrowth <- rnorm(numofdays, mean, sd)
+  i <- 1
+  for (j in simulatedGrowth) {
+    if (i>2) {
+      simulatedValues[i] <- simulatedValues[i-1] * (1+j)
+    } else {
+      simulatedValues[i] <- start * (1+j)
+    }
+    
+    i <- i + 1
+  }
+  
+  print(simulatedValues)
+  return (simulatedValues)
 }
 
 
