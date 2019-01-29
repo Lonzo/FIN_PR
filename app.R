@@ -191,8 +191,23 @@ server <- function(input, output) {
       print(paste("Stock 5 Growth Mean: ", stock5growthsMean, " Stock 5 Growth SD: " , stock5growthsSd))
     }
     
-    
-    
+    var95list <- list()
+    var99list <- list()
+    expectedShortfall95List <- list()
+    expectedShortfall99List <- list()
+    for (i in 1:input$sims) {
+      tempPSPlist <- portfolioStockPrices[[i]]
+      pspGrowth <- calcGrowth(tempPSPlist)
+      
+      var95list[i] <- calcVaR95(pspGrowth)
+      var99list[i] <- calcVaR99(pspGrowth)
+      
+      var95 <- as.numeric(var95list[i])
+      var99 <- as.numeric(var99list[i])
+      expectedShortfall95List[i] <- calcExpectedShortfall(pspGrowth, var95)
+      expectedShortfall99List[i] <- calcExpectedShortfall(pspGrowth, var99)
+    }
+    browser()
     
 
   })
@@ -303,21 +318,35 @@ simulateGrowth <- function(mean, sd, start, numofdays, sims) {
 
 # Calculate Value at Risk 95%
 calcVaR95 <- function(stockprices) {
-  
-  return (1,65 * calcSd(stockprices, calcMean(stockprices)))
+
+  temp <- 1.65 * calcSd(stockprices, calcMean(stockprices))
+  return (temp)
   
 }
 
 # Calculate Value at Risk 99%
 calcVaR99 <- function(stockprices) {
   
-  return (1,65 * calcSd(stockprices, calcMean(stockprices)))
+  temp <- 2.33 * calcSd(stockprices, calcMean(stockprices))
+  return (temp)
   
 }
 
 # Calculate Expected Shortfall
-calcExpectedShortfall <- function() {
-  
+calcExpectedShortfall <- function(stockgrowths, VaR) {
+  VaRneg <- VaR * (-1)
+  expectedShortfallList <- list()
+  for (i in stockgrowths) {
+    if (i < VaRneg) {
+      expectedShortfallList[length(expectedShortfallList) + 1] <- i
+    }
+  }
+  if(length(expectedShortfallList) < 1) {
+    return(0)
+  } else {
+    meanExpShortfall <- calcMean(expectedShortfallList)
+    return(meanExpShortfall)
+  }
 }
 
 # Create Shiny app 
