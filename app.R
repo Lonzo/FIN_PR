@@ -226,22 +226,40 @@ calculateGrowth <- function(values){
 
 # Simulate growth
 simulateGrowth <- function(mean, sd, start, numofdays, sims) {
-  simulatedValues <- integer(length(numofdays))
-  
-  simulatedGrowth <- rnorm(numofdays, mean, sd)
-  i <- 1
-  for (j in simulatedGrowth) {
-    if (i>2) {
-      simulatedValues[i] <- simulatedValues[i-1] * (1+j)
-    } else {
-      simulatedValues[i] <- start * (1+j)
+  allReturnValues <- list()
+  for (k in 1:sims) {
+    
+    simulatedValues <- integer(length(numofdays))
+    
+    simulatedGrowth <- rnorm(numofdays, mean, sd)
+    i <- 1
+    for (j in simulatedGrowth) {
+      if (i>2) {
+        simulatedValues[i] <- simulatedValues[i-1] * (1+j)
+      } else {
+        simulatedValues[i] <- start * (1+j)
+      }
+      
+      
+      
+      i <- i + 1
     }
     
-    i <- i + 1
+    allReturnValues[k] <- (list(simulatedValues))
+    print(allReturnValues[[1]][[1]])
+    print(allReturnValues[[1]][[2]])
+    print(allReturnValues[[1]][[3]])
+    if (k > 1) {
+    print(allReturnValues[[2]][[1]])
+    print(allReturnValues[[2]][[2]])
+    print(allReturnValues[[2]][[3]])
+    }
+    browser()
   }
   
-  print(simulatedValues)
-  return (simulatedValues)
+  
+  
+  return (allReturnValues)
 }
 
 
