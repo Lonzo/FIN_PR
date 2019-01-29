@@ -67,6 +67,11 @@ ui <- fluidPage(
   				min = 1000, max = 100000, step = 10))
       ),
   		fluidRow(
+  		  column(8,
+  		         numericInput("numDays", "Number of Days to forecast", 25, 
+  		                      min = 10, max = 1000, step = 1))
+  		),
+  		fluidRow(
   		  column(5, actionButton("submit", "Go!"))
   		)
     ),
@@ -98,60 +103,97 @@ server <- function(input, output) {
     weights <- c(input$w1, input$w2, input$w3, input$w4, input$w5)
   })
   
+  
+  
   # text output
   output$textop1 <- renderText({
     stocks <- stocks_reactive()
     weights <- weights_reactive()
+    portfolioStockPrices <- rep(list(rep.int(0, times=input$numDays)), input$sims)
     
     if (stocks[1] != "") {
       stock1prices <- getStockPrices(stocks[1])
-      stock1growths <- calculateGrowth(stock1prices)
+      stock1growths <- calcGrowth(stock1prices)
       stock1growthsMean <- calcMean(stock1growths)
       stock1growthsSd <- calcSd(stock1growths, stock1growthsMean)
-      simulatedStockPrices1 <- simulateGrowth(stock1growthsMean, stock1growthsSd, stock1prices[length(stock1prices)], 20, input$sims)
+      simulatedStockPrices1 <- simulateGrowth(stock1growthsMean, stock1growthsSd, stock1prices[length(stock1prices)], input$numDays, input$sims)
+      
+      for (i in 1:input$sims) {
+        for (j in 1:input$numDays) {
+          portfolioStockPrices[[i]][[j]] <- portfolioStockPrices[[i]][[j]] + (simulatedStockPrices1[[i]][[j]] * input$w1/100)
+        }
+      }
       
       print(paste("Stock 1 Growth Mean: ", stock1growthsMean, " Stock 1 Growth SD: " , stock1growthsSd))
     }
     
     if (stocks[2] != "") {
       stock2prices <- getStockPrices(stocks[2])
-      stock2growths <- calculateGrowth(stock2prices)
+      stock2growths <- calcGrowth(stock2prices)
       stock2growthsMean <- calcMean(stock2growths)
       stock2growthsSd <- calcSd(stock2growths, stock2growthsMean)
-      simulatedStockPrices2 <- simulateGrowth(stock2growthsMean, stock2growthsSd, stock2prices[length(stock2prices)], 20, input$sims)
+      simulatedStockPrices2 <- simulateGrowth(stock2growthsMean, stock2growthsSd, stock2prices[length(stock2prices)], input$numDays, input$sims)
       
+      for (i in 1:input$sims) {
+        for (j in 1:input$numDays) {
+          portfolioStockPrices[[i]][[j]] <- portfolioStockPrices[[i]][[j]] + (simulatedStockPrices2[[i]][[j]] * input$w2/100)
+        }
+      }
+
       print(paste("Stock 2 Growth Mean: ", stock2growthsMean, " Stock 2 Growth SD: " , stock2growthsSd))
     }
     
     if (stocks[3] != "") {
       stock3prices <- getStockPrices(stocks[3])
-      stock3growths <- calculateGrowth(stock3prices)
+      stock3growths <- calcGrowth(stock3prices)
       stock3growthsMean <- calcMean(stock3growths)
       stock3growthsSd <- calcSd(stock3growths, stock3growthsMean)
-      simulatedStockPrices3 <- simulateGrowth(stock3growthsMean, stock3growthsSd, stock3prices[length(stock3prices)], 20, input$sims)
+      simulatedStockPrices3 <- simulateGrowth(stock3growthsMean, stock3growthsSd, stock3prices[length(stock3prices)], input$numDays, input$sims)
+      
+      for (i in 1:input$sims) {
+        for (j in 1:input$numDays) {
+          portfolioStockPrices[[i]][[j]] <- portfolioStockPrices[[i]][[j]] + (simulatedStockPrices3[[i]][[j]] * input$w3/100)
+        }
+      }
       
       print(paste("Stock 3 Growth Mean: ", stock3growthsMean, " Stock 3 Growth SD: " , stock3growthsSd))
     }
     
     if (stocks[4] != "") {
       stock4prices <- getStockPrices(stocks[4])
-      stock4growths <- calculateGrowth(stock4prices)
+      stock4growths <- calcGrowth(stock4prices)
       stock4growthsMean <- calcMean(stock4growths)
       stock4growthsSd <- calcSd(stock4growths, stock4growthsMean)
-      simulatedStockPrices4 <- simulateGrowth(stock4growthsMean, stock4growthsSd, stock4prices[length(stock4prices)], 20, input$sims)
+      simulatedStockPrices4 <- simulateGrowth(stock4growthsMean, stock4growthsSd, stock4prices[length(stock4prices)], input$numDays, input$sims)
+      
+      for (i in 1:input$sims) {
+        for (j in 1:input$numDays) {
+          portfolioStockPrices[[i]][[j]] <- portfolioStockPrices[[i]][[j]] + (simulatedStockPrices4[[i]][[j]] * input$w4/100)
+        }
+      }
       
       print(paste("Stock 4 Growth Mean: ", stock4growthsMean, " Stock 4 Growth SD: " , stock4growthsSd))
     }
     
     if (stocks[5] != "") {
       stock5prices <- getStockPrices(stocks[5])
-      stock5growths <- calculateGrowth(stock5prices)
+      stock5growths <- calcGrowth(stock5prices)
       stock5growthsMean <- calcMean(stock5growths)
       stock5growthsSd <- calcSd(stock5growths, stock5growthsMean)
-      simulatedStockPrices5 <- simulateGrowth(stock5growthsMean, stock5growthsSd, stock5prices[length(stock5prices)], 20, input$sims)
+      simulatedStockPrices5 <- simulateGrowth(stock5growthsMean, stock5growthsSd, stock5prices[length(stock5prices)], input$numDays, input$sims)
+      
+      for (i in 1:input$sims) {
+        for (j in 1:input$numDays) {
+          portfolioStockPrices[[i]][[j]] <- portfolioStockPrices[[i]][[j]] + (simulatedStockPrices5[[i]][[j]] * input$w5/100)
+        }
+      }
       
       print(paste("Stock 5 Growth Mean: ", stock5growthsMean, " Stock 5 Growth SD: " , stock5growthsSd))
     }
+    
+    
+    
+    
 
   })
   
@@ -178,6 +220,7 @@ getStockPrices <- function(stock){
   return (closingPrices) 
 }
 
+# Calculate mean of all values in list
 calcMean <- function(stockprices){
   counter = 0
   sum = 0L
@@ -192,6 +235,7 @@ calcMean <- function(stockprices){
   return (mean)
 }
 
+# Calculate standard deviation of all values in list
 calcSd <- function(stockprices, stockmean){
   counter = 0
   temp1 = 0
@@ -205,9 +249,8 @@ calcSd <- function(stockprices, stockmean){
   return (sd)
 }
 
-
 # Calculate Growth
-calculateGrowth <- function(values){
+calcGrowth <- function(values){
   growths <- integer(length(values))
   lastVal <- NULL
   i <- 0
@@ -222,7 +265,6 @@ calculateGrowth <- function(values){
   }
   return (growths)
 }
-
 
 # Simulate growth
 simulateGrowth <- function(mean, sd, start, numofdays, sims) {
@@ -240,28 +282,43 @@ simulateGrowth <- function(mean, sd, start, numofdays, sims) {
         simulatedValues[i] <- start * (1+j)
       }
       
-      
-      
       i <- i + 1
     }
     
     allReturnValues[k] <- (list(simulatedValues))
-    print(allReturnValues[[1]][[1]])
-    print(allReturnValues[[1]][[2]])
-    print(allReturnValues[[1]][[3]])
-    if (k > 1) {
-    print(allReturnValues[[2]][[1]])
-    print(allReturnValues[[2]][[2]])
-    print(allReturnValues[[2]][[3]])
-    }
-    browser()
+    
+    # HOWTO access returned values:
+    # print(allReturnValues[[1]][[1]])
+    # print(allReturnValues[[1]][[2]])
+    # print(allReturnValues[[1]][[3]])
+    # if (k > 1) {
+    #   print(allReturnValues[[2]][[1]])
+    #   print(allReturnValues[[2]][[2]])
+    #   print(allReturnValues[[2]][[3]])
+    # }
   }
-  
-  
   
   return (allReturnValues)
 }
 
+# Calculate Value at Risk 95%
+calcVaR95 <- function(stockprices) {
+  
+  return (1,65 * calcSd(stockprices, calcMean(stockprices)))
+  
+}
+
+# Calculate Value at Risk 99%
+calcVaR99 <- function(stockprices) {
+  
+  return (1,65 * calcSd(stockprices, calcMean(stockprices)))
+  
+}
+
+# Calculate Expected Shortfall
+calcExpectedShortfall <- function() {
+  
+}
 
 # Create Shiny app 
 shinyApp(ui = ui, server = server)
