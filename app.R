@@ -82,6 +82,18 @@ ui <- fluidPage(
         plotOutput(outputId = "distPlot")
       ),
       fluidRow(
+        plotOutput(outputId = "var95plot")
+      ),
+      fluidRow(
+        plotOutput(outputId = "es95plot")
+      ),
+      fluidRow(
+        plotOutput(outputId = "var99plot")
+      ),
+      fluidRow(
+        plotOutput(outputId = "es99plot")
+      ),
+      fluidRow(
         column(12, textOutput("textop1"))
       )
     )
@@ -91,11 +103,15 @@ ui <- fluidPage(
 
 # Define server logic
 server <- function(input, output) {
+  var95list <- list()
+  var99list <- list()
+  expectedShortfall95List <- list()
+  expectedShortfall99List <- list()
+  portfolioStockPrices <- list()
   
   # reactive expression
   stocks_reactive <- eventReactive( input$submit, {
     stocks <- c(input$stock1, input$stock2, input$stock3, input$stock4, input$stock5)
-    #stocks <- c(input$stock1)
   })
   
   # reactive expression
@@ -103,14 +119,14 @@ server <- function(input, output) {
     weights <- c(input$w1, input$w2, input$w3, input$w4, input$w5)
   })
   
-  
-  
-  # text output
-  output$textop1 <- renderText({
+  simulationReactive <- eventReactive( input$submit, {
     stocks <- stocks_reactive()
     weights <- weights_reactive()
-    portfolioStockPrices <- rep(list(rep.int(0, times=input$numDays)), input$sims)
+
+    print("Simulation-Reactive Start")
     
+    portfolioStockPrices <- rep(list(rep.int(0, times=input$numDays)), input$sims)
+
     if (stocks[1] != "") {
       stock1prices <- getStockPrices(stocks[1])
       stock1growths <- calcGrowth(stock1prices)
@@ -139,7 +155,7 @@ server <- function(input, output) {
           portfolioStockPrices[[i]][[j]] <- portfolioStockPrices[[i]][[j]] + (simulatedStockPrices2[[i]][[j]] * input$w2/100)
         }
       }
-
+      
       print(paste("Stock 2 Growth Mean: ", stock2growthsMean, " Stock 2 Growth SD: " , stock2growthsSd))
     }
     
@@ -195,6 +211,7 @@ server <- function(input, output) {
     var99list <- list()
     expectedShortfall95List <- list()
     expectedShortfall99List <- list()
+    
     for (i in 1:input$sims) {
       tempPSPlist <- portfolioStockPrices[[i]]
       pspGrowth <- calcGrowth(tempPSPlist)
@@ -207,9 +224,81 @@ server <- function(input, output) {
       expectedShortfall95List[i] <- calcExpectedShortfall(pspGrowth, var95)
       expectedShortfall99List[i] <- calcExpectedShortfall(pspGrowth, var99)
     }
-    browser()
+    
+    results <- list(pspGrowth, var95list, var99list, expectedShortfall95List, expectedShortfall99List)
+    
+    
+  })
+  
+  
+  # text output
+  output$textop1 <- renderText({
+    
     
 
+  })
+  
+  output$distPlot <- renderPlot({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
+
+    print("Start Diagram 1")
+    
+    pspGrowth <- simulationData[[1]]
+    
+  })
+  
+  output$var95plot <- renderPlot({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
+    
+    print("Start Diagram 2")
+    
+    var95list <- simulationData[[2]]
+    
+    temp <- as.numeric(var95list)
+    hist(temp)
+  })
+  
+  output$es95plot <- renderPlot({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
+    
+    print("Start Diagram 3")
+
+    expectedShortfall95List <- simulationData[[4]]
+    
+    temp <- as.numeric(expectedShortfall95List)
+    hist(temp)
+  })
+  
+  output$var99plot <- renderPlot({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
+    
+    print("Start Diagram 4")
+
+    var99list <- simulationData[[3]]
+    
+    temp <- as.numeric(var99list)
+    hist(temp)
+  })
+  
+  output$es99plot <- renderPlot({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
+    
+    print("Start Diagram 5")
+
+    expectedShortfall99List <- simulationData[[5]]
+    
+    temp <- as.numeric(expectedShortfall99List)
+    hist(temp)
   })
   
 }
