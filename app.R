@@ -49,19 +49,6 @@ ui <- fluidPage(
   				   min = 1, max = 100))
   		),
   		fluidRow(
-  		column(6,
-  			dateInput("date", 
-  				"Starting Date", 
-  				"2013-01-01", 
-  				format = "yyyy-mm-dd")),
-  		column(6,
-  			 dateInput("date", 
-  				"End Date", 
-  				"2014-01-01", 
-  				format = "yyyy-mm-dd"))
-  				
-  		),
-  		fluidRow(
   			column(8,
   				numericInput("sims", "Number of Simulations", 1000, 
   				min = 1000, max = 100000, step = 10))
@@ -80,6 +67,9 @@ ui <- fluidPage(
     mainPanel(
       fluidRow(
         plotOutput(outputId = "distPlot")
+      ),
+      fluidRow(
+        plotOutput(outputId = "distPlot2")
       ),
       fluidRow(
         plotOutput(outputId = "var95plot")
@@ -225,7 +215,7 @@ server <- function(input, output) {
       expectedShortfall99List[i] <- calcExpectedShortfall(pspGrowth, var99)
     }
     
-    results <- list(pspGrowth, var95list, var99list, expectedShortfall95List, expectedShortfall99List)
+    results <- list(portfolioStockPrices, var95list, var99list, expectedShortfall95List, expectedShortfall99List)
     
     
   })
@@ -245,8 +235,75 @@ server <- function(input, output) {
 
     print("Start Diagram 1")
     
-    pspGrowth <- simulationData[[1]]
+    portfolioStockPrices <- simulationData[[1]]
     
+    high <- NULL
+    highid <- 0
+    low <- NULL
+    lowid <- 0
+    counter <-0
+    for (o in portfolioStockPrices) {
+      counter <- counter + 1
+      length <- length(o)
+      if (is.null(high)) {
+        high <- o[length]
+      } else {
+        if (o[length] > high) {
+          high <- o[length]
+          highid = counter
+        }
+      }
+      
+      if (is.null(low)) {
+        low <- o[length]
+      } else {
+        if (o[length] < low) {
+          low <- o[length]
+          lowid = counter
+        }
+      }
+    }
+    
+    plot(portfolioStockPrices[[highid]], main="Best Case Development of Portfolio", ylab = "Portfolio Price")
+  })
+  
+  output$distPlot2 <- renderPlot({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
+    
+    print("Start Diagram 1")
+    
+    portfolioStockPrices <- simulationData[[1]]
+    
+    high <- NULL
+    highid <- 0
+    low <- NULL
+    lowid <- 0
+    counter <-0
+    for (o in portfolioStockPrices) {
+      counter <- counter + 1
+      length <- length(o)
+      if (is.null(high)) {
+        high <- o[length]
+      } else {
+        if (o[length] > high) {
+          high <- o[length]
+          highid = counter
+        }
+      }
+      
+      if (is.null(low)) {
+        low <- o[length]
+      } else {
+        if (o[length] < low) {
+          low <- o[length]
+          lowid = counter
+        }
+      }
+    }
+    
+    plot(portfolioStockPrices[[lowid]], main="Worst Case Development of Portfolio", ylab = "Portfolio Price")
   })
   
   output$var95plot <- renderPlot({
@@ -258,8 +315,8 @@ server <- function(input, output) {
     
     var95list <- simulationData[[2]]
     
-    temp <- as.numeric(var95list)
-    hist(temp)
+    VaR95 <- as.numeric(var95list)
+    hist(VaR95, main="Vale at Risk 95%", xlab="maximum loss in best 95%")
   })
   
   output$es95plot <- renderPlot({
@@ -271,8 +328,8 @@ server <- function(input, output) {
 
     expectedShortfall95List <- simulationData[[4]]
     
-    temp <- as.numeric(expectedShortfall95List)
-    hist(temp)
+    ExpectedShortfall95 <- as.numeric(expectedShortfall95List)
+    hist(ExpectedShortfall95, main="Expected Shortfall of VaR95", xlab="average maximum loss in worst 5%")
   })
   
   output$var99plot <- renderPlot({
@@ -284,8 +341,8 @@ server <- function(input, output) {
 
     var99list <- simulationData[[3]]
     
-    temp <- as.numeric(var99list)
-    hist(temp)
+    VaR99 <- as.numeric(var99list)
+    hist(VaR99, main="Value at Risk 99%", xlab="maximum loss in best 95%")
   })
   
   output$es99plot <- renderPlot({
@@ -297,8 +354,8 @@ server <- function(input, output) {
 
     expectedShortfall99List <- simulationData[[5]]
     
-    temp <- as.numeric(expectedShortfall99List)
-    hist(temp)
+    ExpectedShortfall99 <- as.numeric(expectedShortfall99List)
+    hist(ExpectedShortfall99, main="Expected Shortfall of VaR99", xlab="average maximum loss in worst 5%")
   })
   
 }
@@ -314,8 +371,8 @@ getStockPrices <- function(stock){
   getSymbols(stock,
              env = environment,
              src = "yahoo",
-             from = as.Date("2018-01-01"),
-             to = as.Date("2019-01-01"))
+             from = as.Date("2018-01-30"),
+             to = as.Date("2019-01-30"))
   
   output<-get(stock, envir = environment)
   
