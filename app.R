@@ -5,7 +5,7 @@ library(quantmod)
 ui <- fluidPage(
   
   # App title ----
-  titlePanel("Monte-Carlo Portfolio-Simulation"),
+  titlePanel("Monte-Carlo Risikokennzahl Portfolio-Simulation"),
   
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -55,8 +55,8 @@ ui <- fluidPage(
       ),
   		fluidRow(
   		  column(8,
-  		         numericInput("numDays", "Number of Days to forecast", 25, 
-  		                      min = 10, max = 1000, step = 1))
+  		    numericInput("numDays", "Number of Days to forecast", 15, 
+  		    min = 10, max = 1000, step = 1))
   		),
   		fluidRow(
   		  column(5, actionButton("submit", "Go!"))
@@ -66,10 +66,16 @@ ui <- fluidPage(
     # Main panel for displaying outputs ----
     mainPanel(
       fluidRow(
+        htmlOutput("textop1")
+      ),
+      fluidRow(
         plotOutput(outputId = "distPlot")
       ),
       fluidRow(
         plotOutput(outputId = "distPlot2")
+      ),
+      fluidRow(
+        htmlOutput("textop2")
       ),
       fluidRow(
         plotOutput(outputId = "var95plot")
@@ -82,9 +88,6 @@ ui <- fluidPage(
       ),
       fluidRow(
         plotOutput(outputId = "es99plot")
-      ),
-      fluidRow(
-        column(12, textOutput("textop1"))
       )
     )
   )
@@ -112,6 +115,7 @@ server <- function(input, output) {
   simulationReactive <- eventReactive( input$submit, {
     stocks <- stocks_reactive()
     weights <- weights_reactive()
+    startingPrice <- 0
 
     print("Simulation-Reactive Start")
     
@@ -123,6 +127,7 @@ server <- function(input, output) {
       stock1growthsMean <- calcMean(stock1growths)
       stock1growthsSd <- calcSd(stock1growths, stock1growthsMean)
       simulatedStockPrices1 <- simulateGrowth(stock1growthsMean, stock1growthsSd, stock1prices[length(stock1prices)], input$numDays, input$sims)
+      startingPrice <- startingPrice + (stock1prices[length(stock1prices)] * input$w1/100)
       
       for (i in 1:input$sims) {
         for (j in 1:input$numDays) {
@@ -139,6 +144,7 @@ server <- function(input, output) {
       stock2growthsMean <- calcMean(stock2growths)
       stock2growthsSd <- calcSd(stock2growths, stock2growthsMean)
       simulatedStockPrices2 <- simulateGrowth(stock2growthsMean, stock2growthsSd, stock2prices[length(stock2prices)], input$numDays, input$sims)
+      startingPrice <- startingPrice + (stock2prices[length(stock2prices)] * input$w2/100)
       
       for (i in 1:input$sims) {
         for (j in 1:input$numDays) {
@@ -155,6 +161,7 @@ server <- function(input, output) {
       stock3growthsMean <- calcMean(stock3growths)
       stock3growthsSd <- calcSd(stock3growths, stock3growthsMean)
       simulatedStockPrices3 <- simulateGrowth(stock3growthsMean, stock3growthsSd, stock3prices[length(stock3prices)], input$numDays, input$sims)
+      startingPrice <- startingPrice + (stock3prices[length(stock3prices)] * input$w3/100)
       
       for (i in 1:input$sims) {
         for (j in 1:input$numDays) {
@@ -171,6 +178,7 @@ server <- function(input, output) {
       stock4growthsMean <- calcMean(stock4growths)
       stock4growthsSd <- calcSd(stock4growths, stock4growthsMean)
       simulatedStockPrices4 <- simulateGrowth(stock4growthsMean, stock4growthsSd, stock4prices[length(stock4prices)], input$numDays, input$sims)
+      startingPrice <- startingPrice + (stock4prices[length(stock4prices)] * input$w4/100)
       
       for (i in 1:input$sims) {
         for (j in 1:input$numDays) {
@@ -187,6 +195,7 @@ server <- function(input, output) {
       stock5growthsMean <- calcMean(stock5growths)
       stock5growthsSd <- calcSd(stock5growths, stock5growthsMean)
       simulatedStockPrices5 <- simulateGrowth(stock5growthsMean, stock5growthsSd, stock5prices[length(stock5prices)], input$numDays, input$sims)
+      startingPrice <- startingPrice + (stock5prices[length(stock5prices)] * input$w5/100)
       
       for (i in 1:input$sims) {
         for (j in 1:input$numDays) {
@@ -215,7 +224,37 @@ server <- function(input, output) {
       expectedShortfall99List[i] <- calcExpectedShortfall(pspGrowth, var99)
     }
     
-    results <- list(portfolioStockPrices, var95list, var99list, expectedShortfall95List, expectedShortfall99List)
+    var95listnew <- getWorst5(portfolioStockPrices)
+    var99listnew <- getWorst1(portfolioStockPrices)
+    
+    # loss percentage calculation (VaR)
+    startingPrice <- as.numeric(startingPrice)
+    var95new <- startingPrice/var95listnew[1]
+    var95new <- (var95new - 1) * 100
+    
+    var99new <- startingPrice/var99listnew[1]
+    var99new <- (var99new - 1) * 100
+    
+    # calculating expected shortfall based on lists of VaR-Values
+    counter <- 0
+    cumulativeDiff <- 0
+    for (v in var95listnew) {
+      cumulativeDiff <- cumulativeDiff + startingPrice - v
+      counter <- counter + 1
+    }
+
+    expectedShortfall95new <- cumulativeDiff / counter
+    
+    counter <- 0
+    cumulativeDiff <- 0
+    for (v in var99listnew) {
+      cumulativeDiff <- cumulativeDiff + startingPrice - v
+      counter <- counter + 1
+    }
+    expectedShortfall99new <- cumulativeDiff / counter
+    
+    results <- list(portfolioStockPrices, var95list, var99list, expectedShortfall95List, expectedShortfall99List, 
+                    var95new, var99new, expectedShortfall95new, expectedShortfall99new)
     
     
   })
@@ -223,9 +262,18 @@ server <- function(input, output) {
   
   # text output
   output$textop1 <- renderText({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
     
+    print("Start Text Output")
     
+    string1 <- paste("Value at Risk: To 95%, we do not expect to lose more than ", simulationData[6], "% Portfolio Value in the specified number of days. <br />")
+    string2 <- paste("Value at Risk To 99%, we do not expect to lose more than ", simulationData[7], "% Portfolio Value in the specified number of days. <br />")
+    string3 <- paste("Expected Shortfall 95%: ", simulationData[8], "$ <br />")
+    string4 <- paste("Expected Shortfall 99% ", simulationData[9], "$ <br />")
 
+    HTML(paste(string1, string2, string3, string4))
   })
   
   output$distPlot <- renderPlot({
@@ -306,6 +354,18 @@ server <- function(input, output) {
     plot(portfolioStockPrices[[lowid]], main="Worst Case Development of Portfolio", ylab = "Portfolio Price")
   })
   
+  # text output
+  output$textop2 <- renderText({
+    stocks <- stocks_reactive()
+    weights <- weights_reactive()
+    simulationData <- simulationReactive()
+    
+    string1 <- paste("<h2>Results of Single-Stock Calculations </h2><br />")
+    string2 <- paste("(Results like shown in presentation)<br />")
+    
+    HTML(paste(string1, string2))
+  })
+  
   output$var95plot <- renderPlot({
     stocks <- stocks_reactive()
     weights <- weights_reactive()
@@ -329,7 +389,7 @@ server <- function(input, output) {
     expectedShortfall95List <- simulationData[[4]]
     
     ExpectedShortfall95 <- as.numeric(expectedShortfall95List)
-    hist(ExpectedShortfall95, main="Expected Shortfall of VaR95", xlab="average maximum loss in worst 5%")
+    hist(ExpectedShortfall95, main="Expected Shortfall of VaR95", xlab="average maximum loss VaR95")
   })
   
   output$var99plot <- renderPlot({
@@ -355,7 +415,7 @@ server <- function(input, output) {
     expectedShortfall99List <- simulationData[[5]]
     
     ExpectedShortfall99 <- as.numeric(expectedShortfall99List)
-    hist(ExpectedShortfall99, main="Expected Shortfall of VaR99", xlab="average maximum loss in worst 5%")
+    hist(ExpectedShortfall99, main="Expected Shortfall of VaR99", xlab="average maximum loss VaR99")
   })
   
 }
@@ -494,6 +554,47 @@ calcExpectedShortfall <- function(stockgrowths, VaR) {
     return(meanExpShortfall)
   }
 }
+
+# Reworked VaR and ES Calculations
+
+# returns list with all values of worst 5%
+getWorst5 <- function(allStockPrices) {
+  counter <-0
+  onlyClosingPrices <- list()
+  for (n in allStockPrices) {
+    counter <- counter + 1
+    onlyClosingPrices[counter] <- n[length(n)]
+  }
+
+  temp <- as.integer(length(onlyClosingPrices) * 0.05)
+  onlyClosingPrices <- unlist(onlyClosingPrices)
+  
+  var95listtemp <- sort(onlyClosingPrices, decreasing=FALSE)
+  var95list <- head(var95listtemp, temp)
+  var95list <- sort(var95list, decreasing=TRUE)
+  
+  return (var95list)
+}
+
+#  returns list with all values of worst 1%
+getWorst1 <- function(allStockPrices) {
+  counter <-0
+  onlyClosingPrices <- list()
+  for (n in allStockPrices) {
+    counter <- counter + 1
+    onlyClosingPrices[counter] <- n[length(n)]
+  }
+  
+  temp <- as.integer(length(onlyClosingPrices) * 0.01)
+  onlyClosingPrices <- unlist(onlyClosingPrices)
+  
+  var99listtemp <- sort(onlyClosingPrices, decreasing=FALSE)
+  var99list <- head(var99listtemp, temp)
+  var99list <- sort(var99list, decreasing=TRUE)
+  
+  return (var99list)
+}
+
 
 # Create Shiny app 
 shinyApp(ui = ui, server = server)
